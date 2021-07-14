@@ -1,0 +1,223 @@
+// SVLRC: Single Variable Linear Regression Calculator
+// Purpose: Predicts outcome based on independant variable (x)
+
+#include <iostream>
+#include <vector>
+#include <fstream>
+#include <string>
+
+using namespace std;
+
+// main(): defines entry point of application
+void main()
+{
+	char option; // store option from end user
+	bool repeat_menu = true; // determines if menu should be repeated
+
+	double x_indiv; // variable used to hold individual x values
+	double y_indiv; // variable used to hold individual y values
+
+	vector<double> x_set; // vector to hold a set of x variables
+	vector<double> y_set; // vector to hold a set of y variables
+
+						  // both sample size of x and y are doubles because they will be used in the 
+						  // calculation of m and b 
+	double x_sample_size; // variable to hold sample size of all x values
+	double y_sample_size; // variable to hold sample size of all y values
+
+	double independant_var; // independant variable used in option p to determine predicted outcome aka X
+	double dependant_var; // dependant variable or outcome(prediction) aka Y
+	double m; // var to hold value of m. slope
+	double b; // var to hold value of b. intercept
+
+			  // components of formula for finding m
+	double m1 = 0;
+	double m2 = 0;
+	double m3 = 0;
+	double m4 = 0;
+	double m5 = 0;
+
+	// components of formula for finding b
+	double b1 = 0;
+	double b2 = 0;
+	double b3 = 0;
+	double b4 = 0;
+	double b5 = 0;
+	double b6 = 0;
+
+	string file_name_x_set; // file name for the x data set
+	string file_name_y_set; // file name for the y data set
+
+	ifstream fin; // file object to read data
+
+	// visual graphic for m and b components can be found on website: 
+	// https://www.statisticshowto.datasciencecentral.com/probability-and-statistics/regression-analysis/find-a-linear-regression-equation/
+
+
+	while (repeat_menu)
+	{
+
+		// define a menu for the user
+		cout << "SVLRC: Single Variable Linear Regression Calulator" << endl;
+		cout << endl;
+		cout << "E - Enter X/Y Values Manually (NOT RECOMMENDED)" << endl;
+		cout << "R - Read X/Y Coordinate File (RECOMMENDED)" << endl;
+		cout << "P - Predict Outcome Based on Independant Variable" << endl;
+		cout << "Q - Quit Program" << endl;
+		cout << "-- Enter an option & Press Enter: ";
+		cin >> option;
+
+		switch (option)
+		{
+		case 'E': case 'e':
+		{
+			// ask user to enter sample size for x and y sets
+
+			cout << "Enter sample size of x: ";
+			cin >> x_sample_size;
+
+			cout << "Enter sample size of y: ";
+			cin >> y_sample_size;
+
+			// read in all x and y values and store them in the x and y vectors
+
+			for (unsigned int i = 0; i < x_sample_size; i++)
+			{
+				cout << "Enter x[" << i << "]: ";
+				cin >> x_indiv;
+				x_set.push_back(x_indiv);
+			}
+
+			for (int i = 0; i < y_sample_size; i++)
+			{
+				cout << "Enter y[" << i << "]: ";
+				cin >> y_indiv;
+				y_set.push_back(y_indiv);
+			}
+
+			// successfully read x and y values into x and y columns
+			cout << "Success!" << endl;
+
+			break;
+		}
+
+		case 'P': case 'p':
+		{
+			// calculate m 
+
+			// m1
+			for (int i = 0; i < x_sample_size; i++)
+				m1 += x_set[i] * y_set[i];
+
+			// m2
+			for (int i = 0; i < x_sample_size; i++)
+				m2 += x_set[i];
+
+			// m3
+			for (int i = 0; i < y_sample_size; i++)
+				m3 += y_set[i];
+
+			// m4
+			for (int i = 0; i < x_sample_size; i++)
+				m4 += x_set[i] * x_set[i];
+
+			// m5
+			for (int i = 0; i < x_sample_size; i++)
+				m5 += x_set[i];
+
+			m = ((x_sample_size * m1) - (m2 * m3)) / ((x_sample_size * m4) - (m5 * m5));
+			cout << "m: " << m << endl;
+
+			// calculate b
+
+			// b1
+			for (int i = 0; i < y_sample_size; i++)
+				b1 += y_set[i];
+
+			// b2
+			for (int i = 0; i < x_sample_size; i++)
+				b2 += x_set[i] * x_set[i];
+
+			// b3
+			for (int i = 0; i < x_sample_size; i++)
+				b3 += x_set[i];
+
+			// b4 
+			for (int i = 0; i < x_sample_size; i++)
+				b4 += x_set[i] * y_set[i];
+
+			// b5
+			for (int i = 0; i < x_sample_size; i++)
+				b5 += x_set[i] * x_set[i];
+
+			// b6
+			for (int i = 0; i < x_sample_size; i++)
+				b6 += x_set[i];
+
+			b = ((b1 * b2) - (b3 * b4)) / ((x_sample_size * b5) - (b6 * b6));
+
+			cout << "b: " << b << endl;
+
+			// ask user to enter independant variable
+			cout << "Enter independant variable X and I will predict outcome: ";
+			cin >> independant_var;
+
+			dependant_var = m * independant_var + b;
+
+			cout << "Predicted outcome: " << dependant_var << endl;
+
+			break;
+		}
+
+		case 'r': case 'R':
+		{
+			// ask user to enter file name for x data set
+			// make sur to append .txt to the file name for x dataset
+			cout << "Enter file name for x dataset: ";
+			cin >> file_name_x_set;
+
+			file_name_x_set += ".txt";
+
+			cout << "Enter file name for y dataset: ";
+			cin >> file_name_y_set;
+
+			file_name_y_set += ".txt";
+
+			// open x dataset file and read data into x_set vector
+			fin.open(file_name_x_set);
+
+			while (fin >> x_indiv)
+				x_set.push_back(x_indiv);
+
+			fin.close();
+
+			// open y dataset file and read data into y_set vector
+			fin.open(file_name_y_set);
+
+			while (fin >> y_indiv)
+				y_set.push_back(y_indiv);
+
+			fin.close();
+
+			// initialize x and y sample size based on x_set and y_set vector size
+			x_sample_size = x_set.size();
+			y_sample_size = y_set.size();
+
+			cout << "Success!" << endl;
+
+			break;
+		}
+
+		case 'q': case 'Q':
+		{
+			cout << "Have a good day! Bye!" << endl;
+			repeat_menu = false;
+			break;
+		}
+
+		}
+
+		system("pause"); // prevent console from terminating before user can input data
+	}
+
+}
